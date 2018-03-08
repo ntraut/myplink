@@ -7,10 +7,12 @@
 
 set -e
 
-if command -v gmktemp >& /dev/null; then
+if mktemp --version >& grep -q GNU; then
+    mktemp=mktemp
+elif gmktemp --version >& grep -q GNU; then
     mktemp=gmktemp
 else
-    mktemp=mktemp
+    echo "Error: no GNU mktemp found in the system" >&2 && exit 1
 fi
 
 np=0; nc=0;
