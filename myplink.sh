@@ -7,9 +7,9 @@
 
 set -e
 
-if mktemp --version >& grep -q GNU; then
+if mktemp --version 2>&1 | grep -q GNU; then
     mktemp=mktemp
-elif gmktemp --version >& grep -q GNU; then
+elif gmktemp --version 2>&1 | grep -q GNU; then
     mktemp=gmktemp
 else
     echo "Error: no GNU mktemp found in the system" >&2 && exit 1
@@ -21,6 +21,9 @@ tmp2=$($mktemp)
 tmp_pheno=$($mktemp --suffix=.pheno)
 tmp_covar=$($mktemp --suffix=.covar)
 trap 'echo removing temporary files; rm $tmp $tmp2 $tmp_pheno $tmp_covar' EXIT
+
+echo "original command:"
+echo $@
 
 cmd=$1
 shift
@@ -147,5 +150,6 @@ if [[ $nc -ne 0 ]]; then
 	cmd="$cmd --covar $covar"
 fi
 
+echo "new command:"
 echo "$cmd"
 eval "$cmd"
