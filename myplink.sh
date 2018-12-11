@@ -15,12 +15,13 @@ else
     echo "Error: no GNU mktemp found in the system" >&2 && exit 1
 fi
 
-np=0; nc=0;
+np=0; nc=0; nk=0
 tmp=$($mktemp)
 tmp2=$($mktemp)
 tmp_pheno=$($mktemp --suffix=.pheno)
 tmp_covar=$($mktemp --suffix=.covar)
-trap 'echo removing temporary files; rm $tmp $tmp2 $tmp_pheno $tmp_covar' EXIT
+tmp_keep=$($mktemp --suffix=.ind)
+trap 'echo removing temporary files; rm $tmp $tmp2 $tmp_pheno $tmp_covar $tmp_keep' EXIT
 
 echo "original command:"
 echo $@
@@ -54,6 +55,28 @@ do
 		fi
 		shift # past argument
 		((++np))
+		;;
+	--keep)
+		file="$2"
+		if [[ $nk -eq 0 ]]; then
+			keep=$file
+		else
+		    if [[ $nk -eq 1 ]]; then
+		        cat $keep > $tmp_keep
+		        keep=$tmp_keep
+		    fi
+			awk 'NR == FNR {
+				k[$1, $2]=$0
+				next
+			}
+			($1, $2) in k {
+				printf "%s", k[$1, $2]
+				print ""
+			}' $tmp_keep $file > $tmp
+			cp $tmp $tmp_keep
+		fi
+		shift # past argument
+		((++nk))
 		;;
 	--qcovar)
 		file="$2"
@@ -145,6 +168,9 @@ echo "npheno=$np, ncovar=$nc"
 
 if [[ $np -ne 0 ]]; then
 	cmd="$cmd --pheno $pheno"
+fi
+if [[ $nk -ne 0 ]]; then
+	cmd="$cmd --keep $keep"
 fi
 if [[ $nc -ne 0 ]]; then
 	cmd="$cmd --covar $covar"
