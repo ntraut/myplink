@@ -24,7 +24,7 @@ tmp_keep=$($mktemp --suffix=.ind)
 trap 'echo removing temporary files; rm $tmp $tmp2 $tmp_pheno $tmp_covar $tmp_keep' EXIT
 
 echo "original command:"
-echo $@
+echo "$@"
 
 cmd=$1
 shift
@@ -38,7 +38,7 @@ do
 			pheno=$file
 		else
 		    if [[ $np -eq 1 ]]; then
-		        cat $pheno > $tmp_pheno
+		        cat "$pheno" > "$tmp_pheno"
 		        pheno=$tmp_pheno
 		    fi
 			awk 'NR == FNR {
@@ -50,8 +50,8 @@ do
 				for (i=3; i<=NF; i++)
 					printf " %s", $i
 				print ""
-			}' $tmp_pheno $file > $tmp
-			cp $tmp $tmp_pheno
+			}' "$tmp_pheno" "$file" > "$tmp"
+			cp "$tmp" "$tmp_pheno"
 		fi
 		shift # past argument
 		((++np))
@@ -62,7 +62,7 @@ do
 			keep=$file
 		else
 		    if [[ $nk -eq 1 ]]; then
-		        cat $keep > $tmp_keep
+		        cat "$keep" > "$tmp_keep"
 		        keep=$tmp_keep
 		    fi
 			awk 'NR == FNR {
@@ -72,8 +72,8 @@ do
 			($1, $2) in k {
 				printf "%s", k[$1, $2]
 				print ""
-			}' $tmp_keep $file > $tmp
-			cp $tmp $tmp_keep
+			}' "$tmp_keep" "$file" > "$tmp"
+			cp "$tmp" "$tmp_keep"
 		fi
 		shift # past argument
 		((++nk))
@@ -81,7 +81,7 @@ do
 	--qcovar)
 		file="$2"
 		if [[ $nc -eq 0 ]]; then
-			cat $file > $tmp_covar
+			cat "$file" > "$tmp_covar"
 			covar=$tmp_covar
 		else
 			awk 'NR == FNR {
@@ -93,8 +93,8 @@ do
 				for (i=3; i<=NF; i++)
 					printf " %s", $i
 				print ""
-			}' $tmp_covar $file > $tmp
-			cp $tmp $tmp_covar
+			}' "$tmp_covar" "$file" > "$tmp"
+			cp "$tmp" "$tmp_covar"
 		fi
 		shift # past argument
 		((++nc))
@@ -137,9 +137,9 @@ do
 					printf " 0"
 			}
 			print ""
-		}' $file $file > $tmp2
+		}' "$file" "$file" > "$tmp2"
 		if [[ $nc -eq 0 ]]; then
-		    cp $tmp2 $tmp_covar
+		    cp "$tmp2" "$tmp_covar"
 			covar=$tmp_covar
 		else
 			awk 'NR == FNR {
@@ -151,8 +151,8 @@ do
 				for (i=3; i<=NF; i++)
 					printf " %s", $i
 				print ""
-			}' $tmp_covar $tmp2 > $tmp
-			cp $tmp $tmp_covar
+			}' "$tmp_covar" "$tmp2" > "$tmp"
+			cp "$tmp" "$tmp_covar"
 		fi
 		shift # past argument
 		((++nc))
